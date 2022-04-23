@@ -5,10 +5,12 @@ Pre-Processing for raw fits. Dark & flat subtraction. Give WCS information using
 You need to install astrometry.net beforehand http://astrometry.net/doc/readme.html  
 Confirm that you can use the command "solve-field". 
 
-Then, you need to get *index files* from http://data.astrometry.net/4200/, and put them to data directory for astrometry.net (possibly /usr/local/astrometry/data)
-
-Read http://data.astrometry.net/4200/ carefully. Index files are needed for astrometry.net to solve WCS. 
-
+## Get index files for astrometry.net
+**After installing, you have to read http://astrometry.net/doc/readme.html carefully.**  
+You need to get *index files* from http://data.astrometry.net/4200/, and  
+put them to data directory for astrometry.net (possibly /usr/local/astrometry/data)  
+Necessary index files depend on FOV, and it would be OK to get only index-4201~4205 files for TriCCS (6 * 12 arcmins^2).    
+You can use function *download_index_files* from from preseimei.install for downloading files. 
 
 ## Install 
 For normal install, 
