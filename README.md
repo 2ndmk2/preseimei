@@ -1,5 +1,5 @@
 # preseimei
-Pre-Processing for raw fits. Dark & flat subtraction. Give WCS information using astrometry.net. 
+Pre-Processing for raw fits (SEIMEI TriCCS data in mind). Dark & flat subtraction. Give WCS information using astrometry.net. 
 
 ## Requirement 
 You need to install astrometry.net beforehand http://astrometry.net/doc/readme.html  
