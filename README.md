@@ -5,7 +5,8 @@ Pre-Processing for raw fits. Dark & flat subtraction. Give WCS information using
 You need to install astrometry.net beforehand http://astrometry.net/doc/readme.html  
 Confirm that you can use the command "solve-field". 
 
-Then, you need to get *index files* from http://data.astrometry.net/4200/
+Then, you need to get *index files* from http://data.astrometry.net/4200/, and put them to data directory for astrometry.net (possibly /usr/local/astrometry/data)
+
 Read http://data.astrometry.net/4200/ carefully. Index files are needed for astrometry.net to solve WCS. 
 
 
