@@ -4,7 +4,7 @@ from preseimei import seimei_ana
 
 data_dir = '/alps/south/'
 obs_date = '20220111'
-obj_files = ["/alps/south/20220111/TRCS00110420.fits]
+obj_files = ["/alps/south/20220111/TRCS00110420.fits"]
 
 gain_exp_for_obj = "x8_0.996464"
 gain_exp_for_flat = "x8_1.992928"
