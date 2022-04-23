@@ -1,9 +1,10 @@
 # preseimei
-Pre-Processing for SEIMEI raw fits
+Pre-Processing for raw fits. Dark & flat subtraction. Give WCS information using astrometry.net. 
 
 ## Requirement 
-You need to install astrometry.net beforehand.
-http://astrometry.net/doc/readme.html
+You need to install astrometry.net beforehand http://astrometry.net/doc/readme.html  
+Confirm that you can use the command "solve-field". 
+
 
 
 ## Install 
