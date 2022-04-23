@@ -126,7 +126,6 @@ def garbage_remove_for_astronet(file_name_before_fits, out_folder):
         for file_for_remove in files_for_remove:
             os.remove(file_for_remove)
 
-
 def main(data_dir, obs_date,  obj_files, out_folder = "/alps/south/20220111_reduced", dark_flat_folder = "./"):
 
     flat_dark = np.load(os.path.join(dark_flat_folder, "flat_dark_%s.npz" % obs_date))
