@@ -1,19 +1,21 @@
-# tesarot
-Detecting and confirming stellar rotational periods for TESS data
+# preseimei
+Pre-Processing for SEIMEI raw fits
+
+## Requirement 
+You need to install astrometry.net beforehand.
+http://astrometry.net/doc/readme.html
+
 
 ## Install 
 For normal install, 
 * python setup.py install
-* *For conda/pip env*, go to parental directory of tesarot, and "pip install ./tesarot"
+* *For conda/pip env*, go to parental directory of tesarot, and "pip install ./preseimei"
 
 ## Install for development
 For developers, 
 
 * python setup.py develop
-*  *For conda/pip env*, go to parental directory of tesarot, and "pip install -e ./tesarot"
+*  *For conda/pip env*, go to parental directory of tesarot, and "pip install -e ./preseimei"
 
 ## Test run
-Go to ipynb & tests folder
-
-
-[![alt](tpf_TESS_Sector_44_17198188_120s_diffimg.png)](href)
+Go to tests folder
