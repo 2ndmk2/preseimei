@@ -120,11 +120,11 @@ def garbage_remove_for_astronet(file_name_before_fits, out_folder):
 
         Returns:None
     """
-        files = glob.glob("%s/%s*" % (out_folder, file_name_before_fits))
-        files_new = glob.glob("%s/%s*.new" % (out_folder, file_name_before_fits))
-        files_for_remove =list( set(files) - set(files_new))
-        for file_for_remove in files_for_remove:
-            os.remove(file_for_remove)
+    files = glob.glob("%s/%s*" % (out_folder, file_name_before_fits))
+    files_new = glob.glob("%s/%s*.new" % (out_folder, file_name_before_fits))
+    files_for_remove =list( set(files) - set(files_new))
+    for file_for_remove in files_for_remove:
+        os.remove(file_for_remove)
 
 def main(data_dir, obs_date,  obj_files, out_folder = "/alps/south/20220111_reduced", dark_flat_folder = "./"):
 
