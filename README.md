@@ -29,4 +29,4 @@ For developers,
 *  *For conda/pip env*, go to parental directory of tesarot, and "pip install -e ./preseimei"
 
 ## Test run
-Go to tests folder
+Go to tests & ipynb folder
