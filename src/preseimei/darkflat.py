@@ -3,7 +3,7 @@ import os
 import astropy.io.fits as fits
 import numpy as np
 
-def sep_files_grz(files):
+def sep_files_grz(files, file_header = None):
     """ Sort files by 3 bands
        *0.fits -> g band
         *1.fits -> r band
@@ -16,13 +16,19 @@ def sep_files_grz(files):
             r_files: Arrays of files in r band
             z_files: Arrays of files in z band
     """    
-    g_files = [ file for file in files if "0.fits" in file]
-    r_files = [ file for file in files if "1.fits" in file]
-    z_files = [ file for file in files if "2.fits" in file]
+    if file_header is None:
+        g_files = [ file for file in files if "0.fits" in file]
+        r_files = [ file for file in files if "1.fits" in file]
+        z_files = [ file for file in files if "2.fits" in file]
+    else:
+        g_files = [ file for file in files if "0.fits" in file and file_header in file]
+        r_files = [ file for file in files if "1.fits" in file and file_header in file]
+        z_files = [ file for file in files if "2.fits" in file and file_header in file]
+        
     return g_files, r_files, z_files
 
 
-def get_image_med(image_files):
+def get_image_med(image_files, band = "r"):
     """ Make median images for arrays of movies
 
         Params:
@@ -34,18 +40,108 @@ def get_image_med(image_files):
 
     image_arr = []
     for image_file in image_files:
-        hdul = fits.open(image_file)
-        data = hdul[0].data
-        image_med = np.median(data , axis=0)
-        image_arr.append(image_med)
-        hdul.close()
+        try:
+            hdul = fits.open(image_file)
+            data = hdul[0].data
+            image_med = np.median(data , axis=0)
+            image_arr.append(image_med)
+            hdul.close()
+        except:
+            pass
         
     return np.array(image_arr)
 
-def get_dark_flat_obj_file(data_dir, obs_date, gain_exp_for_obj ="x8_0.996464", \
-    gain_exp_for_flat ="x8_1.992928", dark_name = "DARK", flat_name = "FLAT"):
-    """ Get dark & flat files. Note that dark for flat can be different from flat. 
+def get_flat_and_dark_cadences(data_dir, obs_date, dark_name = "DARK", flat_name = "twilight"):
+    
+    fns_all = glob.glob(data_dir+obs_date+'/*.fits')
+    obs_dark_types = []
+    obs_flat_types = []
+    for fn in fns_all:
+        try:
+            hdul = fits.open(fn)
+            obj_type = hdul[0].header['OBJECT']
+            gain = hdul[0].header['GAINCNFG']
+            exposure = str(hdul[0].header['EXPTIME1'])
+            obs_type = gain+'_'+exposure
 
+            if obj_type == dark_name:
+                obs_dark_types.append(obs_type)
+            if obj_type ==  flat_name:
+                obs_flat_types.append(obs_type)
+            hdul.close()
+        except:
+            pass
+    return  list(set(obs_dark_types)),  list(set(obs_flat_types ))
+
+def get_obs_cadences(data_dir, obs_date, dark_name = "DARK", flat_name = "twilight"):
+    
+    fns_all = glob.glob(data_dir+obs_date+'/*.fits')
+    obs_types = []
+
+    for fn in fns_all:
+        hdul = fits.open(fn)
+        obj_type = hdul[0].header['OBJECT']
+        gain = hdul[0].header['GAINCNFG']
+        exposure = str(hdul[0].header['EXPTIME1'])
+        obs_type = gain+'_'+exposure
+        
+        if obj_type == dark_name  or obj_type ==  flat_name:
+            continue
+        obs_types.append(obs_type)    
+        hdul.close()
+
+    return obs_types  
+
+def get_obj_names(data_dir, obs_date):
+    
+    fns_all = glob.glob(data_dir+obs_date+'/*.fits')
+    obj_types = []
+
+    for fn in fns_all:
+        hdul = fits.open(fn)
+        obj_type = hdul[0].header['OBJECT']
+        obj_types.append(obj_type)    
+        hdul.close()
+
+    return list(set(obj_types ))
+
+def get_all_dark_flat_file(data_dir, obs_date, dark_name = "DARK", flat_name = "twilight"):
+    """ Get all dark & flat files
+
+        Params:
+            data_dir: Directory for raw data
+            obs_date: Observational date (str)
+            dark_name name for dark in header
+            flat_name: name for flat in header
+        Returns:
+            dark_files: Array of files for darks 
+            flat_files: Array of files for flats
+    """
+
+    fns_all = glob.glob(data_dir+obs_date+'/*.fits')
+    dark_files = []
+    flat_files = []
+
+    for fn in fns_all:
+        try: 
+            hdul = fits.open(fn)
+            obj_type = hdul[0].header['OBJECT']
+            gain = hdul[0].header['GAINCNFG']
+            exposure = str(hdul[0].header['EXPTIME1'])
+            obs_type = gain+'_'+exposure
+            if obj_type == dark_name:
+                dark_files .append(fn)        
+            if obj_type == flat_name:
+                flat_files.append(fn)        
+            hdul.close()
+        except:
+            pass
+    return dark_files, flat_files
+
+def get_dark_flat_obj_file(data_dir, obs_date, gain_exp_for_obj ="x8_0.996464", \
+    gain_exp_for_flat ="x8_1.992928",  dark_exp_for_flat = "x_", dark_name = "DARK", flat_name = "twilight"):
+    """ Get dark & flat files. Note that dark for flat can be different from flat. 
+    
         Params:
             data_dir: Directory for raw data
             obs_date: Observational date (str)
@@ -59,30 +155,52 @@ def get_dark_flat_obj_file(data_dir, obs_date, gain_exp_for_obj ="x8_0.996464", 
             flat_files: Array of files for flats
     """
 
-    fns_all = glob.glob(data_dir+obs_date+'/*')
+    fns_all = glob.glob(data_dir+obs_date+'/*.fits')
     dark_for_flat_files = []
     dark_for_obj_files = []
     flat_files = []
 
     for fn in fns_all:
-        hdul = fits.open(fn)
-        obj_type = hdul[0].header['OBJECT']
-        gain = hdul[0].header['GAINCNFG']
-        exposure = str(hdul[0].header['EXPTIME1'])
-        obs_type = gain+'_'+exposure
+        try:
+            hdul = fits.open(fn)
+            obj_type = hdul[0].header['OBJECT']
+            gain = hdul[0].header['GAINCNFG']
+            exposure = str(hdul[0].header['EXPTIME1'])
+            obs_type = gain+'_'+exposure
 
-        if obj_type == dark_name  and obs_type == gain_exp_for_obj:
-            dark_for_obj_files.append(fn)        
+            if obj_type == dark_name  and obs_type == gain_exp_for_obj:
+                dark_for_obj_files.append(fn)        
 
-        if obj_type == dark_name  and obs_type == gain_exp_for_flat :
-            dark_for_flat_files.append(fn)     
+            if obj_type == dark_name  and obs_type == gain_exp_for_flat :
+                dark_for_flat_files.append(fn)     
 
-        if obj_type == flat_name and obs_type == gain_exp_for_flat :
-            flat_files.append(fn)        
+            if obj_type == flat_name and obs_type == gain_exp_for_flat :
+                flat_files.append(fn)        
 
-        hdul.close()
-
+            hdul.close()
+        except:
+            pass
     return dark_for_flat_files, dark_for_obj_files, flat_files
+
+
+
+def reduce_flats_to_one_flat(flats, dark, flux_max= 12000):
+    
+    if len(flats)==1:
+        flat_now = flats[0] - dark
+        flat_final= flat_now/np.median(flat_now)
+        return flat_final, np.array([flat_final])
+    flat_sub = flats - dark
+    flat_med_arr = np.median(flat_sub, axis=(1,2))
+    flat_red_arr = []
+    for (i, flat_med) in enumerate(flat_sub):
+        if flat_med_arr[i] < flux_max:
+            flat_now = flat_med/flat_med_arr[i]
+            flat_red_arr.append(flat_now)
+    flat_final = np.median(flat_red_arr, axis=0)
+    flat_final = flat_final / np.median(flat_final)
+    return flat_final, flat_red_arr
+    
     
 def get_flat_dark(flat_files, dark_for_flat_files, dark_for_obj_files):
     """ Compute median images for darks & flats. Flats are first subtracted by darks for flats
@@ -96,14 +214,14 @@ def get_flat_dark(flat_files, dark_for_flat_files, dark_for_obj_files):
             flat: Flat image
             dark_for_obj_med: Dark image
     """
-    flat_before_dark = get_image_med(flat_files)[0]
+    flats_arr = get_image_med(flat_files)
     dark_for_flat_med_arr = get_image_med(dark_for_flat_files)
     dark_for_flat_med = np.median( dark_for_flat_med_arr, axis=0)
-    flat = flat_before_dark  - dark_for_flat_med
+    flat_reduced, flat_red_arr =reduce_flats_to_one_flat(flats_arr, dark_for_flat_med)    
     dark_for_obs_arr = get_image_med(dark_for_obj_files)
     dark_for_obj_med = np.median( dark_for_obs_arr, axis=0)
     
-    return flat, dark_for_obj_med
+    return flat_reduced, dark_for_obj_med
 
 def three_bands_flat_dark( dark_for_flat_files, dark_for_obj_files, flat_files):
     """ Compute dark & flats in 3 bands.
@@ -153,8 +271,16 @@ def save_three_bands_flat_dark(g_flat, r_flat, z_flat, g_dark_for_obj, r_dark_fo
 
 def main(data_dir, obs_date, out_dir, gain_exp_for_obj ="x8_0.996464", \
     gain_exp_for_flat ="x8_1.992928"):
+    
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+        
+    file_name = os.path.join(out_dir, "flat_dark_%s.npz" % obs_date)
 
-    dark_for_flat_files, dark_for_obj_files,  flat_files = get_dark_flat_obj_file(data_dir, obs_date, gain_exp_for_obj = gain_exp_for_obj, gain_exp_for_flat = gain_exp_for_flat )
+    if os.path.exists(file_name):
+        return None
+    
+    dark_for_flat_files, dark_for_obj_files,  flat_files = get_dark_flat_obj_file(data_dir, obs_date, gain_exp_for_obj = gain_exp_for_obj, gain_exp_for_flat = gain_exp_for_flat , dark_exp_for_flat =gain_exp_for_flat)
     g_flat, r_flat, z_flat, g_dark_for_obj, r_dark_for_obj, z_dark_for_obj = \
     three_bands_flat_dark(dark_for_flat_files, dark_for_obj_files,  flat_files)
     save_three_bands_flat_dark(g_flat, r_flat, z_flat, g_dark_for_obj, r_dark_for_obj, \

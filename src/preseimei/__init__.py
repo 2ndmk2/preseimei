@@ -10,3 +10,5 @@ __description__ = "pre-processsing for raw fits files"
 from . import darkflat
 from . import install_indexfiles
 from . import seimei_ana
+from . import movie_lc_ana
+from . import utils
